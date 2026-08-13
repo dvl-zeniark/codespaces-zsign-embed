@@ -2,6 +2,8 @@
 
 Mint sessions on your server; ZSign Documents / Requests / Builder / Signer run in `EmbedFrame`. No custom field UI in the host app.
 
+Vite + a small Express BFF so StackBlitz compiles quickly. API keys stay in `.env` on the server.
+
 ## Clone
 
 Into the current directory (so `package.json` is at the project root, not in a nested folder):
@@ -24,8 +26,6 @@ ZSIGN_API_BASE=https://stg-zsign.zeniark.net
 npm install && npm run dev
 ```
 
-StackBlitz runs Next with WASM SWC (no native compiler). The first `Compiling /` can take a minute; later loads are faster.
-
 ## Use the app
 
 Mint steps + iframe. Upload documents in the Documents hub (or via your API); paste `documentId` for New builder.
@@ -34,7 +34,7 @@ Mint steps + iframe. Upload documents in the Documents hub (or via your API); pa
 
 | File | Role |
 |---|---|
-| `app/api/embed/mint/route.ts` | All mint surfaces |
+| `server/api.ts` | Mint, lists, webhooks |
 | `lib/embed-mint.ts` | Hub `?next=`, builder, signer |
 | `components/EmbedWorkspace.tsx` | Teaching UI |
 | `components/EmbedFrame.tsx` | `iframe.src` only |
