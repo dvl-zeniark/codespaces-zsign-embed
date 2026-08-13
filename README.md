@@ -7,7 +7,7 @@ Mint sessions on your server; ZSign Documents / Requests / Builder / Signer run 
 Into the current directory (so `package.json` is at the project root, not in a nested folder):
 
 ```bash
-git clone https://github.com/dvl-zeniark/-stackblitz-zsign-embed.git .
+git clone https://github.com/dvl-zeniark/stackblitz-zsign-embed.git .
 ```
 
 ## `.env`
