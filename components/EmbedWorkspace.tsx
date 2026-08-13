@@ -97,6 +97,7 @@ export function EmbedWorkspace() {
     queryKey: ["signature-requests"],
     queryFn: () =>
       api<{ requests: SignatureRequestRow[] }>("/api/embed/requests"),
+    refetchInterval: 2000,
   });
   const docsQ = useQuery({
     queryKey: ["documents"],

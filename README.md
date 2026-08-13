@@ -24,6 +24,8 @@ ZSIGN_API_BASE=https://stg-zsign.zeniark.net
 npm install && npm run dev
 ```
 
+StackBlitz runs Next with WASM SWC (no native compiler). The first `Compiling /` can take a minute; later loads are faster.
+
 ## Use the app
 
 Mint steps + iframe. Upload documents in the Documents hub (or via your API); paste `documentId` for New builder.
