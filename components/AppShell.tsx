@@ -13,7 +13,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </p>
           </div>
           <p className="text-xs text-zinc-500">
-            <code className="text-[11px]">server/api.ts</code>
+            <code className="text-[11px]">app/api/embed/mint</code>
             {" · "}
             <code className="text-[11px]">components/EmbedFrame.tsx</code>
           </p>

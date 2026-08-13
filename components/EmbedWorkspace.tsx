@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "@/lib/search-params";
+import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { EmbedFrame } from "@/components/EmbedFrame";

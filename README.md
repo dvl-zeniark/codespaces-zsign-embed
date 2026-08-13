@@ -2,8 +2,6 @@
 
 Mint sessions on your server; ZSign Documents / Requests / Builder / Signer run in `EmbedFrame`. No custom field UI in the host app.
 
-Vite (not Next.js) so StackBlitz/WebContainers do not hang on WASM SWC. API keys stay in `.env` on the server (`server/api.ts` via a Vite middleware plugin).
-
 ## Clone
 
 Into the current directory (so `package.json` is at the project root, not in a nested folder):
@@ -26,6 +24,8 @@ ZSIGN_API_BASE=https://stg-zsign.zeniark.net
 npm install && npm run dev
 ```
 
+Next.js App Router (same runtime as StackBlitz's Next.js option). First compile in the browser uses WASM SWC; later reloads are faster.
+
 ## Use the app
 
 Mint steps + iframe. Upload documents in the Documents hub (or via your API); paste `documentId` for New builder.
@@ -34,7 +34,7 @@ Mint steps + iframe. Upload documents in the Documents hub (or via your API); pa
 
 | File | Role |
 |---|---|
-| `server/api.ts` | Mint, lists, webhooks |
+| `app/api/embed/mint/route.ts` | All mint surfaces |
 | `lib/embed-mint.ts` | Hub `?next=`, builder, signer |
 | `components/EmbedWorkspace.tsx` | Teaching UI |
 | `components/EmbedFrame.tsx` | `iframe.src` only |
