@@ -12,25 +12,21 @@ git clone https://github.com/dvl-zeniark/-stackblitz-zsign-embed.git .
 
 ## `.env`
 
-The repo ships an empty `.env`. Paste **your org** keys from ZSign Settings > Integrations.
+The repo ships an empty `.env`. Fill it with **your org** values from ZSign Settings > Integrations.
 
 ```
 ZSIGN_API_KEY=
 ZSIGN_WEBHOOK_SECRET=
+ZSIGN_API_BASE=
 ```
 
 ```bash
-# From workspace root (preferred)
-./dc.sh up
-./dc.sh logs -f partner-quickstart-embed
-
-# Host-native
 npm install && npm run dev
 ```
 
 ## Use the app
 
-Compose service **`partner-quickstart-embed`**. Mint steps + large iframe. Upload documents in the Documents hub (or via your API); paste `documentId` for New builder. No auto-uploaded sample PDF.
+Mint steps + iframe. Upload documents in the Documents hub (or via your API); paste `documentId` for New builder.
 
 ## Read these
 
