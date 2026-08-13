@@ -2,7 +2,7 @@
 
 Mint sessions on your server; ZSign Documents / Requests / Builder / Signer run in `EmbedFrame`. No custom field UI in the host app.
 
-Vite + a small Express BFF so StackBlitz compiles quickly. API keys stay in `.env` on the server.
+Vite (not Next.js) so StackBlitz/WebContainers do not hang on WASM SWC. API keys stay in `.env` on the server (`server/api.ts` via a Vite middleware plugin).
 
 ## Clone
 
