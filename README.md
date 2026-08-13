@@ -2,6 +2,14 @@
 
 Mint sessions on your server; ZSign Documents / Requests / Builder / Signer run in `EmbedFrame`. No custom field UI in the host app.
 
+## Clone
+
+Into the current directory (so `package.json` is at the project root, not in a nested folder):
+
+```bash
+git clone https://github.com/dvl-zeniark/-stackblitz-zsign-embed.git .
+```
+
 ## `.env`
 
 Paste **your org** keys from ZSign Settings > Integrations. No bundled demo keys.
