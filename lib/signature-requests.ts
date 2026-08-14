@@ -40,10 +40,10 @@ export function toRow(sr: SignatureRequest): SignatureRequestRow {
 }
 
 export async function listSignatureRequests(): Promise<SignatureRequestRow[]> {
-  const [drafts, rest] = await Promise.all([
-    zsignJson<ListResponse>("signature-requests?status=draft&limit=50"),
-    zsignJson<ListResponse>("signature-requests?limit=50"),
-  ]);
+  const drafts = await zsignJson<ListResponse>(
+    "signature-requests?status=draft&limit=50",
+  );
+  const rest = await zsignJson<ListResponse>("signature-requests?limit=50");
   const seen = new Set<string>();
   const rows: SignatureRequestRow[] = [];
   for (const sr of [...(drafts.data || []), ...(rest.data || [])]) {

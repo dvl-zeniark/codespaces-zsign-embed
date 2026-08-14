@@ -2,13 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { EmbedFrame } from "@/components/EmbedFrame";
 import { api } from "@/lib/client";
 import type { EmbedSurface } from "@/lib/embed-mint";
 import type { SignatureRequestRow } from "@/lib/signature-requests";
 import type { DocumentRow } from "@/lib/documents";
+import { useLiveEvents } from "@/lib/use-live-events";
 
 type StepDef = {
   id: EmbedSurface;
@@ -93,16 +94,25 @@ const SECTIONS: { title: string; blurb: string; steps: StepDef[] }[] = [
 
 export function EmbedWorkspace() {
   const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
   const requestsQ = useQuery({
     queryKey: ["signature-requests"],
     queryFn: () =>
       api<{ requests: SignatureRequestRow[] }>("/api/embed/requests"),
-    refetchInterval: 2000,
+    // SSE (below) pushes real updates; this interval is just a fallback in
+    // case the stream drops, so it stays slow and stops entirely on error.
+    refetchInterval: (query) => (query.state.status === "error" ? false : 20000),
   });
   const docsQ = useQuery({
     queryKey: ["documents"],
     queryFn: () => api<{ documents: DocumentRow[] }>("/api/embed/documents"),
   });
+  useLiveEvents(
+    useCallback(() => {
+      queryClient.invalidateQueries({ queryKey: ["signature-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+    }, [queryClient]),
+  );
 
   const [surface, setSurface] = useState<EmbedSurface>("documents");
   const [requestId, setRequestId] = useState("");
