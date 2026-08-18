@@ -1,5 +1,10 @@
 import { zsignJson } from "@/lib/zsign";
 
+// This is the core of the embed integration: one mint*() function per
+// surface, each POSTing to the matching /embed/... endpoint and returning
+// the URL to put in an <iframe src>. Called from
+// src/pages/api/embed/mint.ts. See README.md for the full map.
+
 export type EmbedSurface =
   | "documents"
   | "builder"
