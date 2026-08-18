@@ -1,5 +1,5 @@
 {
-  "name": "stackblitz-zsign-astro",
+  "name": "stackblitz-zsign-embed",
   "type": "module",
   "version": "0.0.1",
   "engines": {
@@ -13,13 +13,22 @@
   },
   "dependencies": {
     "@astrojs/node": "^11.1.2",
+    "@astrojs/react": "^6.0.2",
+    "@tailwindcss/vite": "^4.3.3",
+    "@tanstack/react-query": "^5.101.4",
     "astro": "^7.2.2",
+    "clsx": "^2.1.1",
     "dotenv": "^17.4.2",
-    "undici": "^8.10.0"
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "tailwind-merge": "^3.6.0",
+    "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
     "typescript": "^6.0.3"
   }
 }
