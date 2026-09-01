@@ -1,0 +1,15 @@
+---
+import AppLayout from "../layouts/AppLayout.astro";
+import { EmbedFrame } from "../components/EmbedFrame";
+---
+
+<AppLayout title="Documents">
+  <div class="space-y-3">
+    <p class="text-sm text-zinc-600">
+      Server mint:
+      <code class="text-xs">POST /api/mint/documents</code> → ZSign
+      <code class="text-xs">embed/documents</code>
+    </p>
+    <EmbedFrame client:load mintPath="/api/mint/documents" title="Documents" />
+  </div>
+</AppLayout>

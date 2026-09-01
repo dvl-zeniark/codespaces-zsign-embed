@@ -1,0 +1,36 @@
+---
+import AppLayout from "../../layouts/AppLayout.astro";
+import { EmbedFrame } from "../../components/EmbedFrame";
+
+const documentId = Astro.url.searchParams.get("documentId")?.trim() || "";
+---
+
+<AppLayout title="Builder">
+  {
+    !documentId ? (
+      <div class="space-y-3">
+        <p class="text-sm text-zinc-600">
+          Start a new builder session from a document. Upload a PDF in
+          <a href="/documents" class="text-zinc-900 underline">
+            Documents
+          </a>
+          , copy its id from the URL or network tab, then open
+          <code class="text-xs">/builder?documentId=YOUR_ID</code>.
+        </p>
+      </div>
+    ) : (
+      <div class="space-y-3">
+        <p class="text-sm text-zinc-600">
+          Document <code class="text-xs">{documentId}</code> · mint:
+          <code class="text-xs">POST /api/mint/builder</code>
+        </p>
+        <EmbedFrame
+          client:load
+          mintPath="/api/mint/builder"
+          mintBody={{ documentId }}
+          title="Builder"
+        />
+      </div>
+    )
+  }
+</AppLayout>

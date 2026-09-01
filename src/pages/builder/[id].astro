@@ -1,0 +1,28 @@
+---
+import AppLayout from "../../layouts/AppLayout.astro";
+export const prerender = false;
+import { EmbedFrame } from "../../components/EmbedFrame";
+
+const { id } = Astro.params;
+const requestId = id?.trim() || "";
+---
+
+<AppLayout title="Builder">
+  {
+    !requestId ? (
+      <p class="text-sm text-zinc-600">Missing request id.</p>
+    ) : (
+      <div class="space-y-3">
+        <p class="text-sm text-zinc-600">
+          Resume draft <code class="text-xs">{requestId}</code> · mint:
+          <code class="text-xs">POST /api/mint/builder/{requestId}</code>
+        </p>
+        <EmbedFrame
+          client:load
+          mintPath={`/api/mint/builder/${requestId}`}
+          title="Builder"
+        />
+      </div>
+    )
+  }
+</AppLayout>
