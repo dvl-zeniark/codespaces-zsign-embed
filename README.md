@@ -2,8 +2,9 @@
 
 Mint embed sessions on your server, then render ZSign in an `<iframe>`.
 
-> **Branch:** use **`main`** (default; same tip as `redocs`). The old SPA sample
-> lives on **`deprecated`** and is not maintained.
+> **Branches:** **`main`** = partner default (Codespaces “Create”). **`nightly`** =
+> in-progress sample work (agents / pre-release). **`deprecated`** = old SPA (not
+> maintained).
 
 ## Setup
 
