@@ -2,6 +2,9 @@
 
 Mint embed sessions on your server, then render ZSign in an `<iframe>`.
 
+> **Branch:** use **`redocs`** (default). The old SPA sample lives on
+> **`deprecated`** (formerly `main`) and is not maintained.
+
 ## Setup
 
 ### 1. API key (required)
