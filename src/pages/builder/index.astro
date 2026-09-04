@@ -3,17 +3,21 @@ import AppLayout from "../../layouts/AppLayout.astro";
 import { BuilderPanel } from "../../components/BuilderPanel";
 
 const documentId = Astro.url.searchParams.get("documentId")?.trim() || "";
+const requestId = Astro.url.searchParams.get("requestId")?.trim() || "";
 ---
 
 <AppLayout title="Builder">
   <div class="space-y-3">
     <p class="text-sm text-zinc-600">
-      Pick a document (or deep-link with
-      <code class="text-xs">?documentId=</code>), optionally set app context, then
-      mint:
-      <code class="text-xs">POST /api/mint/builder</code> →
-      <code class="text-xs">embed/signature-requests</code>.
+      New builder: pick a document. Resume: pick a draft. Optional app context
+      (<code class="text-xs">directory</code>) applies to either mint.
+      Deep links: <code class="text-xs">?documentId=</code> or
+      <code class="text-xs">/builder/[id]</code>.
     </p>
-    <BuilderPanel client:load mode="new" initialDocumentId={documentId} />
+    <BuilderPanel
+      client:load
+      initialDocumentId={documentId}
+      initialRequestId={requestId}
+    />
   </div>
 </AppLayout>

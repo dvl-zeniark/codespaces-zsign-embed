@@ -10,15 +10,24 @@ const requestId = id?.trim() || "";
 <AppLayout title="Builder">
   {
     !requestId ? (
-      <p class="text-sm text-zinc-600">Missing request id.</p>
+      <p class="text-sm text-zinc-600">
+        Missing request id. Or open{" "}
+        <a href="/builder" class="underline">
+          /builder
+        </a>{" "}
+        and use Resume draft.
+      </p>
     ) : (
       <div class="space-y-3">
         <p class="text-sm text-zinc-600">
           Resume draft <code class="text-xs">{requestId}</code> · mint:
-          <code class="text-xs">POST /api/mint/builder/{requestId}</code> with
-          optional <code class="text-xs">directory</code> app context.
+          <code class="text-xs">POST /api/mint/builder/{requestId}</code>
         </p>
-        <BuilderPanel client:load mode="resume" requestId={requestId} />
+        <BuilderPanel
+          client:load
+          forceMode="resume"
+          initialRequestId={requestId}
+        />
       </div>
     )
   }

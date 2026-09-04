@@ -1,7 +1,7 @@
 ---
 import AppLayout from "../../layouts/AppLayout.astro";
 export const prerender = false;
-import { EmbedFrame } from "../../components/EmbedFrame";
+import { SignerPanel } from "../../components/SignerPanel";
 
 const { id } = Astro.params;
 const requestId = id?.trim() || "";
@@ -10,18 +10,20 @@ const requestId = id?.trim() || "";
 <AppLayout title="Signer">
   {
     !requestId ? (
-      <p class="text-sm text-zinc-600">Missing request id.</p>
+      <p class="text-sm text-zinc-600">
+        Missing request id. Or open{" "}
+        <a href="/signer" class="underline">
+          /signer
+        </a>{" "}
+        and pick a sent request.
+      </p>
     ) : (
       <div class="space-y-3">
         <p class="text-sm text-zinc-600">
-          Signer session for <code class="text-xs">{requestId}</code> · mint:
+          Signer for <code class="text-xs">{requestId}</code> · mint:
           <code class="text-xs">POST /api/mint/signer/{requestId}</code>
         </p>
-        <EmbedFrame
-          client:load
-          mintPath={`/api/mint/signer/${requestId}`}
-          title="Signer"
-        />
+        <SignerPanel client:load initialRequestId={requestId} />
       </div>
     )
   }

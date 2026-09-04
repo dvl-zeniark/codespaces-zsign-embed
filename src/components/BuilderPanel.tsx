@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   AppContextDirectoryFields,
   directoryMintPayload,
@@ -9,56 +9,85 @@ import {
 type Mode = "new" | "resume";
 
 type DocumentRow = { id: string; name: string };
+type RequestRow = {
+  id: string;
+  title: string;
+  status: string;
+  recipientEmail: string;
+  recipientName: string;
+};
 
 type Props = {
-  mode: Mode;
   /** Optional deep-link for mode=new */
   initialDocumentId?: string;
-  /** Required for mode=resume */
-  requestId?: string;
+  /** Optional deep-link for mode=resume (`/builder/[id]`) */
+  initialRequestId?: string;
+  /** Force a single mode; default shows both pickers when neither id is set. */
+  forceMode?: Mode;
 };
 
-type MintState = {
-  directory: DirectoryDraft;
-  documentId: string;
-};
+type MintState =
+  | { kind: "new"; documentId: string; directory: DirectoryDraft }
+  | { kind: "resume"; requestId: string; directory: DirectoryDraft };
 
 /**
- * Builder mint with optional app context (`directory`).
- * New: document dropdown → POST /api/mint/builder { documentId, directory? }
- * Resume: POST /api/mint/builder/:id { directory? }
+ * Builder mint with document dropdown (new) and draft dropdown (resume),
+ * plus optional `directory` app context.
  */
 export function BuilderPanel({
-  mode,
   initialDocumentId = "",
-  requestId,
+  initialRequestId = "",
+  forceMode,
 }: Props) {
+  const startMode: Mode =
+    forceMode ??
+    (initialRequestId.trim()
+      ? "resume"
+      : initialDocumentId.trim()
+        ? "new"
+        : "new");
+
+  const [mode, setMode] = useState<Mode>(startMode);
   const [directory, setDirectory] = useState<DirectoryDraft>(
     emptyDirectoryDraft(),
   );
   const [documents, setDocuments] = useState<DocumentRow[]>([]);
-  const [docsLoading, setDocsLoading] = useState(mode === "new");
+  const [docsLoading, setDocsLoading] = useState(true);
   const [docsError, setDocsError] = useState<string | null>(null);
+  const [requests, setRequests] = useState<RequestRow[]>([]);
+  const [reqsLoading, setReqsLoading] = useState(true);
+  const [reqsError, setReqsError] = useState<string | null>(null);
   const [documentId, setDocumentId] = useState(initialDocumentId.trim());
-  const [mint, setMint] = useState<MintState | null>(
-    mode === "resume" || initialDocumentId.trim()
-      ? {
-          directory: emptyDirectoryDraft(),
-          documentId: initialDocumentId.trim(),
-        }
-      : null,
-  );
+  const [requestId, setRequestId] = useState(initialRequestId.trim());
+  const [mint, setMint] = useState<MintState | null>(() => {
+    if (initialRequestId.trim()) {
+      return {
+        kind: "resume",
+        requestId: initialRequestId.trim(),
+        directory: emptyDirectoryDraft(),
+      };
+    }
+    if (initialDocumentId.trim()) {
+      return {
+        kind: "new",
+        documentId: initialDocumentId.trim(),
+        directory: emptyDirectoryDraft(),
+      };
+    }
+    return null;
+  });
   const [src, setSrc] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const mintPath =
-    mode === "new"
-      ? "/api/mint/builder"
-      : `/api/mint/builder/${requestId ?? ""}`;
+  const drafts = useMemo(
+    () => requests.filter((r) => r.status === "draft"),
+    [requests],
+  );
+
+  const showModeToggle = !forceMode && !initialRequestId.trim();
 
   useEffect(() => {
-    if (mode !== "new") return;
     let cancelled = false;
 
     async function loadDocs() {
@@ -73,9 +102,7 @@ export function BuilderPanel({
         if (!res.ok) {
           throw new Error(data.message || `List failed (${res.status})`);
         }
-        if (!cancelled) {
-          setDocuments(data.documents ?? []);
-        }
+        if (!cancelled) setDocuments(data.documents ?? []);
       } catch (err) {
         if (!cancelled) {
           setDocsError(
@@ -87,11 +114,36 @@ export function BuilderPanel({
       }
     }
 
+    async function loadReqs() {
+      setReqsLoading(true);
+      setReqsError(null);
+      try {
+        const res = await fetch("/api/signature-requests");
+        const data = (await res.json()) as {
+          requests?: RequestRow[];
+          message?: string;
+        };
+        if (!res.ok) {
+          throw new Error(data.message || `List failed (${res.status})`);
+        }
+        if (!cancelled) setRequests(data.requests ?? []);
+      } catch (err) {
+        if (!cancelled) {
+          setReqsError(
+            err instanceof Error ? err.message : "Failed to list drafts",
+          );
+        }
+      } finally {
+        if (!cancelled) setReqsLoading(false);
+      }
+    }
+
     void loadDocs();
+    void loadReqs();
     return () => {
       cancelled = true;
     };
-  }, [mode]);
+  }, []);
 
   function snapshotDirectory(): DirectoryDraft {
     return {
@@ -101,16 +153,35 @@ export function BuilderPanel({
     };
   }
 
-  function apply(nextDocumentId: string = documentId) {
+  function applyNew(nextDocumentId: string = documentId) {
     const id = nextDocumentId.trim();
-    if (mode === "new" && !id) {
+    if (!id) {
       setError("Select a document first.");
       setSrc(null);
       setMint(null);
       return;
     }
+    setMode("new");
     setDocumentId(id);
-    setMint({ directory: snapshotDirectory(), documentId: id });
+    setMint({ kind: "new", documentId: id, directory: snapshotDirectory() });
+  }
+
+  function applyResume(nextRequestId: string = requestId) {
+    const id = nextRequestId.trim();
+    if (!id) {
+      setError("Select a draft first.");
+      setSrc(null);
+      setMint(null);
+      return;
+    }
+    setMode("resume");
+    setRequestId(id);
+    setMint({ kind: "resume", requestId: id, directory: snapshotDirectory() });
+  }
+
+  function apply() {
+    if (mode === "new") applyNew();
+    else applyResume();
   }
 
   useEffect(() => {
@@ -118,15 +189,17 @@ export function BuilderPanel({
     let cancelled = false;
 
     async function run() {
-      if (mode === "resume" && !requestId?.trim()) return;
-
       setLoading(true);
       setError(null);
       setSrc(null);
       try {
         const dir = directoryMintPayload(mint.directory);
+        const mintPath =
+          mint.kind === "new"
+            ? "/api/mint/builder"
+            : `/api/mint/builder/${mint.requestId}`;
         const body: Record<string, unknown> =
-          mode === "new"
+          mint.kind === "new"
             ? {
                 documentId: mint.documentId,
                 ...(dir ? { directory: dir } : {}),
@@ -159,11 +232,52 @@ export function BuilderPanel({
     return () => {
       cancelled = true;
     };
-  }, [mint, mode, requestId, mintPath]);
+  }, [mint]);
 
   return (
     <div className="space-y-4">
       <div className="rounded-lg border border-zinc-200 bg-white p-4 space-y-4">
+        {showModeToggle ? (
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setMode("new")}
+              className={`rounded-md px-3 py-2 text-sm ${
+                mode === "new"
+                  ? "bg-zinc-900 text-white"
+                  : "bg-zinc-50 text-zinc-800 ring-1 ring-zinc-200 hover:bg-zinc-100"
+              }`}
+            >
+              New builder
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMode("resume");
+                void (async () => {
+                  setReqsLoading(true);
+                  try {
+                    const res = await fetch("/api/signature-requests");
+                    const data = (await res.json()) as {
+                      requests?: RequestRow[];
+                    };
+                    setRequests(data.requests ?? []);
+                  } finally {
+                    setReqsLoading(false);
+                  }
+                })();
+              }}
+              className={`rounded-md px-3 py-2 text-sm ${
+                mode === "resume"
+                  ? "bg-zinc-900 text-white"
+                  : "bg-zinc-50 text-zinc-800 ring-1 ring-zinc-200 hover:bg-zinc-100"
+              }`}
+            >
+              Resume draft
+            </button>
+          </div>
+        ) : null}
+
         {mode === "new" ? (
           <div className="space-y-2">
             <label
@@ -173,7 +287,7 @@ export function BuilderPanel({
               Document
             </label>
             <p className="text-xs text-zinc-500">
-              Pick a PDF already uploaded in Documents. Mint calls{" "}
+              Pick a PDF already uploaded in Documents. Mint:{" "}
               <code className="text-[11px]">
                 POST /external/embed/signature-requests {"{ documentId }"}
               </code>
@@ -190,7 +304,7 @@ export function BuilderPanel({
                 onChange={(e) => {
                   const id = e.target.value;
                   setDocumentId(id);
-                  if (id) apply(id);
+                  if (id) applyNew(id);
                 }}
                 className="min-w-[16rem] flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 disabled:opacity-60"
               >
@@ -228,21 +342,73 @@ export function BuilderPanel({
                 Refresh
               </button>
             </div>
-            {!docsLoading && documents.length === 0 ? (
-              <p className="text-xs text-zinc-500">
-                Open{" "}
-                <a href="/documents" className="underline hover:text-zinc-900">
-                  Documents
-                </a>
-                , upload a PDF, then refresh this list.
-              </p>
-            ) : null}
           </div>
         ) : (
-          <p className="text-sm text-zinc-600">
-            Resume draft{" "}
-            <code className="text-xs">{requestId}</code>
-          </p>
+          <div className="space-y-2">
+            <label
+              htmlFor="builder-draft"
+              className="block text-sm font-medium text-zinc-900"
+            >
+              Draft
+            </label>
+            <p className="text-xs text-zinc-500">
+              Resume an existing draft. Mint:{" "}
+              <code className="text-[11px]">
+                POST /external/embed/signature-requests/{"{id}"}
+              </code>
+              .
+            </p>
+            {reqsError ? (
+              <p className="text-sm text-red-600">{reqsError}</p>
+            ) : null}
+            <div className="flex flex-wrap gap-2">
+              <select
+                id="builder-draft"
+                value={requestId}
+                disabled={reqsLoading}
+                onChange={(e) => {
+                  const id = e.target.value;
+                  setRequestId(id);
+                  if (id) applyResume(id);
+                }}
+                className="min-w-[16rem] flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-400 disabled:opacity-60"
+              >
+                <option value="">
+                  {reqsLoading
+                    ? "Loading drafts..."
+                    : drafts.length
+                      ? "Select draft..."
+                      : "No drafts yet"}
+                </option>
+                {drafts.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.recipientName || r.title} ({r.status})
+                    {r.recipientEmail ? ` · ${r.recipientEmail}` : ""}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => {
+                  void (async () => {
+                    setReqsLoading(true);
+                    try {
+                      const res = await fetch("/api/signature-requests");
+                      const data = (await res.json()) as {
+                        requests?: RequestRow[];
+                      };
+                      setRequests(data.requests ?? []);
+                    } finally {
+                      setReqsLoading(false);
+                    }
+                  })();
+                }}
+                className="rounded-md bg-zinc-100 px-3 py-2 text-sm text-zinc-800 ring-1 ring-zinc-200 hover:bg-zinc-200"
+              >
+                Refresh
+              </button>
+            </div>
+          </div>
         )}
 
         <div className="border-t border-zinc-100 pt-3">
@@ -255,15 +421,15 @@ export function BuilderPanel({
         <div className="flex flex-wrap items-center gap-3 border-t border-zinc-100 pt-3">
           <button
             type="button"
-            onClick={() => apply()}
+            onClick={apply}
             className="rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-800"
           >
             Re-mint builder
           </button>
           <p className="text-[11px] text-zinc-500">
-            {mode === "new"
-              ? "POST /external/embed/signature-requests"
-              : `POST /external/embed/signature-requests/${requestId}`}
+            {mint?.kind === "resume"
+              ? `POST /external/embed/signature-requests/${mint.requestId}`
+              : "POST /external/embed/signature-requests"}
             {mint?.directory.enabled ? " { directory }" : ""}
           </p>
         </div>
@@ -273,9 +439,11 @@ export function BuilderPanel({
       {loading ? (
         <p className="text-sm text-zinc-500">Loading embed...</p>
       ) : null}
-      {!mint && mode === "new" && !error ? (
+      {!mint && !error ? (
         <p className="text-sm text-zinc-500">
-          Select a document to mint the builder iframe.
+          {mode === "new"
+            ? "Select a document to mint the builder iframe."
+            : "Select a draft to resume in the builder iframe."}
         </p>
       ) : null}
       {src ? (

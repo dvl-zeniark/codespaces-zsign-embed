@@ -1,0 +1,15 @@
+---
+import AppLayout from "../../layouts/AppLayout.astro";
+import { SignerPanel } from "../../components/SignerPanel";
+---
+
+<AppLayout title="Signer">
+  <div class="space-y-3">
+    <p class="text-sm text-zinc-600">
+      Pick a sent signature request from the dropdown (or deep-link
+      <code class="text-xs">/signer/[id]</code>). Mint:
+      <code class="text-xs">POST /api/mint/signer/[id]</code>.
+    </p>
+    <SignerPanel client:load />
+  </div>
+</AppLayout>

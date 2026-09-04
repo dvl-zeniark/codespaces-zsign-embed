@@ -53,10 +53,11 @@ scoping), hub buttons, and hub hiding — not name/people/logo. Mint:
 | Path | Mint endpoint |
 |---|---|
 | `/documents` | `POST /api/mint/documents` (optional body: `directory` app context) |
-| `/builder` | Document dropdown → `POST /api/mint/builder` (optional `directory`; `?documentId=` still works) |
-| `/builder/[id]` | `POST /api/mint/builder/[id]` (optional `directory`) |
-| `/signature-requests` | `POST /api/mint/signature-requests` (body: `view`, optional `recipientEmail`, optional `visibleHubs`) |
-| `/signer/[id]` | `POST /api/mint/signer/[id]` |
+| `/builder` | Document or draft dropdown → mint (optional `directory`) |
+| `/builder/[id]` | Resume draft deep-link |
+| `/signer` | Sent-request dropdown → mint |
+| `/signer/[id]` | Signer deep-link |
+| `/signature-requests` | `POST /api/mint/signature-requests` (`view`, optional `directory.recipientEmail`, optional `visibleHubs`) |
 | `/webhooks` | (no mint — read-only inbox) |
 
 ## Webhooks
