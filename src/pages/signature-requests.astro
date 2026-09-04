@@ -1,15 +1,20 @@
 ---
 import AppLayout from "../layouts/AppLayout.astro";
-import { EmbedFrame } from "../components/EmbedFrame";
+import { SignatureRequestsPanel } from "../components/SignatureRequestsPanel";
 ---
 
 <AppLayout title="Signature requests">
   <div class="space-y-3">
     <p class="text-sm text-zinc-600">
       Server mint:
-      <code class="text-xs">POST /api/mint/signature-requests</code> → ZSign
-      <code class="text-xs">embed/requests</code>
+      <code class="text-xs">POST /api/mint/signature-requests</code>
+      with hub <code class="text-xs">view</code> (all / drafts / sent / received),
+      optional <code class="text-xs">directory.recipientEmail</code> (Received
+      scoping — not full directory people/tab), and optional
+      <code class="text-xs">visibleHubs</code> for all-hubs hub hiding. Full
+      <code class="text-xs">directory</code> app context lives on Documents +
+      Builder. See <code class="text-xs">pages/api/mint/signature-requests.ts</code>.
     </p>
-    <EmbedFrame client:load mintPath="/api/mint/signature-requests" title="Signature requests" />
+    <SignatureRequestsPanel client:load />
   </div>
 </AppLayout>

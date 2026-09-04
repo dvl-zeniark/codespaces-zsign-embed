@@ -40,14 +40,22 @@ Read in this order:
 
 Each sidebar screen has its own mint route under `src/pages/api/mint/`.
 
+**Documents** + **Builder** share
+[`AppContextDirectoryFields`](src/components/AppContextDirectoryFields.tsx) for
+full `directory` app context (Add from contacts).
+
+**Signature requests** is different: only `directory.recipientEmail` (Received
+scoping), hub buttons, and hub hiding — not name/people/logo. Mint:
+[`src/pages/api/mint/signature-requests.ts`](src/pages/api/mint/signature-requests.ts).
+
 ## UI routes
 
 | Path | Mint endpoint |
 |---|---|
-| `/documents` | `POST /api/mint/documents` |
-| `/builder?documentId=...` | `POST /api/mint/builder` |
-| `/builder/[id]` | `POST /api/mint/builder/[id]` |
-| `/signature-requests` | `POST /api/mint/signature-requests` |
+| `/documents` | `POST /api/mint/documents` (optional body: `directory` app context) |
+| `/builder` | Document dropdown → `POST /api/mint/builder` (optional `directory`; `?documentId=` still works) |
+| `/builder/[id]` | `POST /api/mint/builder/[id]` (optional `directory`) |
+| `/signature-requests` | `POST /api/mint/signature-requests` (body: `view`, optional `recipientEmail`, optional `visibleHubs`) |
 | `/signer/[id]` | `POST /api/mint/signer/[id]` |
 | `/webhooks` | (no mint — read-only inbox) |
 

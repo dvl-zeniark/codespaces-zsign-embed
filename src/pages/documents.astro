@@ -1,6 +1,6 @@
 ---
 import AppLayout from "../layouts/AppLayout.astro";
-import { EmbedFrame } from "../components/EmbedFrame";
+import { DocumentsPanel } from "../components/DocumentsPanel";
 ---
 
 <AppLayout title="Documents">
@@ -8,8 +8,10 @@ import { EmbedFrame } from "../components/EmbedFrame";
     <p class="text-sm text-zinc-600">
       Server mint:
       <code class="text-xs">POST /api/mint/documents</code> → ZSign
-      <code class="text-xs">embed/documents</code>
+      <code class="text-xs">embed/documents</code>. Optional app context
+      (<code class="text-xs">directory</code>) is configured below — see
+      <code class="text-xs">pages/api/mint/documents.ts</code>.
     </p>
-    <EmbedFrame client:load mintPath="/api/mint/documents" title="Documents" />
+    <DocumentsPanel client:load />
   </div>
 </AppLayout>
